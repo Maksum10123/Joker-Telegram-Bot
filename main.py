@@ -11,8 +11,8 @@ from config import BOT_TOKEN, GIPHY_API_KEY
 
 # Бот будет спать случайное время между этими числами перед отправкой
 # Пиши в секундах
-MIN_WAIT = 20
-MAX_WAIT = 60
+MIN_WAIT = 7200
+MAX_WAIT = 14400
 
 
 
@@ -24,7 +24,7 @@ active_loops = set()
 
 
 async def get_random_joker_gif():
-    url = f"https://api.giphy.com/v1/gifs/random?api_key={GIPHY_API_KEY}&tag=joker-Batman&rating=g"
+    url = f"https://api.giphy.com/v1/gifs/random?api_key={GIPHY_API_KEY}&tag=joker-Batman"
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
