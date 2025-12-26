@@ -1,10 +1,10 @@
 import asyncio
 import logging
-import random
+import os, random
 import aiohttp
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 from config import BOT_TOKEN, GIPHY_API_KEY
 
 # Конфиг
@@ -14,14 +14,13 @@ from config import BOT_TOKEN, GIPHY_API_KEY
 MIN_WAIT = 7200
 MAX_WAIT = 14400
 
-
+VOICE_FOLDER = "voices"
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 active_loops = set()
-
 
 async def get_random_joker_gif():
     url = f"https://api.giphy.com/v1/gifs/random?api_key={GIPHY_API_KEY}&tag=joker-Batman"
@@ -78,6 +77,42 @@ async def cmd_stop(message: types.Message):
         await message.answer("Джокер уснул. Скукотища.")
     else:
         await message.answer_animation("https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcW5hMGFwOWVyMmZnZjhtbXVmbmdpN29mODNhYjdyNmIwZXRraDJteCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/A363LZlQaX0ZO/giphy.gif")
+
+@dp.message(Command("shytka"))
+async def cmd_shytka(message: types.Message):
+    try:
+        random_filename = random.choice(os.listdir(VOICE_FOLDER))
+        voice_path = os.path.join(VOICE_FOLDER, random_filename)
+        voice_to_send = FSInputFile(voice_path)
+
+        await message.answer_voice(voice_to_send)
+    except Exception as e:
+        logging.error({e})
+
+@dp.message(Command("random"))
+async def cmd_random(message: types.Message):
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Казик", callback_data="send_kazino")],
+        [InlineKeyboardButton(text="Кубик", callback_data="send_cube")],
+        [InlineKeyboardButton(text="Рональдо", callback_data="send_ronaldo")],
+        [InlineKeyboardButton(text="Дартс", callback_data="send_dartz")]
+    ])
+    await message.answer("Выбери Игру:", reply_markup=keyboard)
+
+
+@dp.callback_query(F.data.in_({"send_kazino", "send_cube", "send_ronaldo", "send_dartz"}))
+async def play_games_handler(callback: types.CallbackQuery):
+    games_map = {
+        "send_kazino": "🎰",
+        "send_cube": "🎲",
+        "send_ronaldo": "⚽",
+        "send_dartz": "🎯"
+    }
+
+    selected_emoji = games_map[callback.data]
+
+    await callback.message.answer_dice(emoji=selected_emoji)
+    await callback.message.delete()
 
 
 @dp.message(Command("help"))
