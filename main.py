@@ -11,8 +11,8 @@ from config import BOT_TOKEN, GIPHY_API_KEY
 
 # Бот будет спать случайное время между этими числами перед отправкой
 # Пиши в секундах
-MIN_WAIT = 7200
-MAX_WAIT = 14400
+MIN_WAIT = 43200
+MAX_WAIT = 86400
 
 VOICE_FOLDER = "voices"
 
